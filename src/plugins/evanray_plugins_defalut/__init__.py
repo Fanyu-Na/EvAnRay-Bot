@@ -4,8 +4,17 @@ from nonebot.adapters.qq.event import GroupAtMessageCreateEvent
 from nonebot.plugin import on_command
 from pathlib import Path
 import base64
+import traceback
 
-ping = on_command("ping")
+from src.libraries.log import log
+
+
+ping = on_command("error")
 @ping.handle()
 async def __(event:GroupAtMessageCreateEvent):
-    await ping.finish([MessageSegment.image("http://43.139.85.91:8081/abstract/10188_1.png"),"Pong!!"]) 
+    try:
+        raise Exception("自定义异常")
+    except Exception:
+        log.info("err: %s" % traceback.format_exc())
+
+    await ping.finish([MessageSegment.image("https://download.fanyu.site/abstract/10188_1.png"),"Pong!!"]) 
