@@ -11,9 +11,10 @@ from src.libraries.data_base.alias_db_handle import alias
 from src.libraries.data_base.abstract_handle import abstract
 from src.libraries.data_base.userdata_handle import userdata
 from src.libraries.maimaidx_music import total_list
-from src.libraries.generate_images.generate_images import generate_music_info,generate_player_best_50,generate_player_music_score
+from src.libraries.generate_images.generate_images import generate_music_info,generate_player_best_50,generate_player_music_score,generate_player_version_plate_table,generate_player_level_table
 from src.libraries.GLOBAL_CONSTANT import version_maps
-from src.libraries.utils import plate_searplayer_version_handle,restore_version,get_user_payload
+from src.libraries.utils import plate_searplayer_version_handle,restore_version,get_user_payload,get_player_rating_ranking
+from src.libraries.diving_fish_request import get_user_name_by_tentcent_user_id
 from pathlib import Path
 import re
 
@@ -39,6 +40,9 @@ ractional_line = on_command('分数线', priority=20)
 player_best_50 = on_command('EvAnRay b50', aliases={'B50', 'b50'}, priority=20)
 player_version_schedule = on_regex('.(将|极|神|舞舞|者)进度', priority=20)
 player_music_score = on_shell_command("info", parser=search_music_abstract_parser,priority=20)
+player_rating_ranking = on_command('我有多菜', priority=20)
+player_version_table = on_regex('.(将|极|神|舞舞)完成表', priority=20)
+player_level_table = on_regex(r'^([0-9]+\+?)完成表', priority=20)
 
 
 @music_info.handle()
@@ -355,7 +359,7 @@ async def _(event: GroupAtMessageCreateEvent, args: Message = CommandArg(), cmd:
         await player_best_50.send("格式出现错误,如需使用-n参数。\n示例:b50 EvAnRay -n")
 
 
-    img, success, ratingS = await generate_player_best_50(payload, userData, is_abstract)
+    img, success, ratingS, file_name = await generate_player_best_50(payload, userData, is_abstract)
 
     if success == 400:
         if mode == 2:
@@ -369,7 +373,7 @@ async def _(event: GroupAtMessageCreateEvent, args: Message = CommandArg(), cmd:
         if ratingS == 0:
             await player_best_50.finish('EvAnRay查到你还没有上传成绩呢,请先上传成绩再来~')
         try:
-            await player_best_50.send(MessageSegment.image(f"{IMAGE_SERVER_URL}/get_player_best_50/{userData['_id']}"))
+            await player_best_50.send(MessageSegment.image(f"{IMAGE_SERVER_URL}/get_player_best_50/{file_name}"))
         except ActionFailed as e:
             await player_best_50.send(f"code:{e.code},msg:{e.message}")
 
@@ -432,3 +436,66 @@ async def _(event: GroupAtMessageCreateEvent, foo: Namespace = ShellCommandArgs(
             await player_music_score.finish('歌曲成绩信息处理异常,请联系EvAnRay管理员。')
     else:
         await player_music_score.finish("未查询到此歌曲信息,请检查歌曲ID或者歌曲别名是否正确。")
+
+
+@player_rating_ranking.handle()
+async def _( event: GroupAtMessageCreateEvent, args: Message = CommandArg()):
+    arg = str(args).strip()
+    if arg == '':
+        userData = userdata.getUserData(event.get_user_id())
+        user_name = userData.get('user_name')
+        if user_name:
+            player_rating_ranking_content = await get_player_rating_ranking(user_name)
+        else:
+            await player_rating_ranking.finish("您当前没有绑定水鱼查分器相关信息，请使用【/bind】命令进行水鱼查分器信息绑定。\n例:【/bind EvAnRay】或【/bind QQ号】")
+    else:
+        player_rating_ranking_content = await get_player_rating_ranking(user_name)
+    await player_rating_ranking.finish(player_rating_ranking_content)
+
+
+
+@player_version_table.handle()
+async def _(event: GroupAtMessageCreateEvent):
+    regex = "(.)(将|极|神|舞舞)完成表"
+    reresult = re.match(regex, str(event.get_message()))
+    if reresult:
+        groups = reresult.groups()
+        version = version_maps.get(groups[0], [])
+        if 0 < len(version) <= 2:
+            version_list = restore_version(version)
+            userData = userdata.getUserData(event.get_user_id())
+            payload = get_user_payload(userData)
+            if not payload:
+                await player_version_table.finish("您当前没有绑定水鱼查分器相关信息，请使用【/bind】命令进行水鱼查分器信息绑定。\n例:【/bind EvAnRay】或【/bind QQ号】")
+
+            payload['version'] = version_list
+            result , file_name = await generate_player_version_plate_table(payload,userData, groups[1], groups[0])
+            
+            if result:
+                try:
+                    await player_version_table.send(MessageSegment.image(f"{IMAGE_SERVER_URL}/get_player_version_plate_table/{file_name}"))
+                except ActionFailed as e:
+                    await player_version_table.send(f"code:{e.code},msg:{e.message}")
+        else:
+            await player_version_table.finish(f'EvAnRay暂时不支持{groups[0]}{groups[1]}完成表的制作。')
+    else:
+        await player_version_table.send('格式错误')
+
+
+
+@player_level_table.handle()
+async def _(event: GroupAtMessageCreateEvent):
+    regex = r'^([0-9]+\+?)完成表'
+    reresult = re.match(regex, str(event.get_message()))
+    if reresult:
+        level = reresult.groups()[0]
+        userData = userdata.getUserData(event.get_user_id())
+        payload = get_user_payload(userData)
+        result , file_name = await generate_player_level_table(payload,userData,level)
+        if result:
+            try:
+                await player_level_table.send(MessageSegment.image(f"{IMAGE_SERVER_URL}/get_player_level_table/{file_name}"))
+            except ActionFailed as e:
+                await player_level_table.send(f"code:{e.code},msg:{e.message}")
+    else:
+        await player_level_table.send('格式错误')

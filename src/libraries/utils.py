@@ -1,8 +1,10 @@
 from src.libraries.data_base.abstract_handle import abstract
 from src.libraries.maimaidx_music import total_list
-from src.libraries.diving_fish_request import get_player_plate_data
+from src.libraries.diving_fish_request import get_player_plate_data,get_rating_ranking
 from pathlib import Path
 import aiohttp
+import operator
+
 
 def get_cover_path(song_id,is_abstract:bool):
     id = int(song_id)
@@ -51,6 +53,7 @@ def get_user_payload(userData):
 
 
 def restore_version(versions:list):
+    print(versions)
     restore_version_list = []
     for version in versions:
         if version == "舞萌DX":
@@ -59,10 +62,11 @@ def restore_version(versions:list):
             restore_version_list.append("maimai でらっくす Splash")
         elif version == "舞萌DX 2022":
             restore_version_list.append("maimai でらっくす UNiVERSE")
-        elif version == "maimai でらっくす FESTiVAL":
-            restore_version_list.append("maimai でらっくす")
+        elif version == "舞萌DX 2023":
+            restore_version_list.append("maimai でらっくす FESTiVAL")
         else:
             restore_version_list.append(version)
+    print(restore_version_list)
     return restore_version_list
 
     
@@ -167,3 +171,23 @@ async def plate_searplayer_version_handle(version, payload, plateType: str, vern
         message_content += f'\n贫瘠状态下需要{str(lxzt)}批西,单刷需要{str(dszt)}批西'
     message_content += '\n加油嗷！！！'
     return message_content
+
+async def get_player_rating_ranking(user_name:str):
+    print("username",user_name)
+    rating_ranking = await get_rating_ranking()
+    rating_ranking_num = len(rating_ranking)
+    total_ratig = 0
+    top = -1
+    user_rating = 0
+    ranking_Dict = sorted(rating_ranking, key=operator.itemgetter('ra'), reverse=True)
+    for index, item in enumerate(ranking_Dict):
+        if str(item['username']).lower() == user_name.lower():
+            top = index + 1
+            user_rating = item['ra']
+        total_ratig += item['ra']
+    if top == -1:
+        return f'未找到{user_name},可能设置隐私。'
+    avg = f'{total_ratig / rating_ranking_num:.4f}'
+    topp = f'{((rating_ranking_num - top) / rating_ranking_num):.2%}'
+    player_rating_ranking_content = f'{user_name}的底分为{user_rating}\nRating排名在{top}\n平均rating为{avg}\n你已经超越了{topp}的玩家。'
+    return player_rating_ranking_content

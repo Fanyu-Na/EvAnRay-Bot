@@ -21,13 +21,13 @@ async def _(event: GroupAtMessageCreateEvent, args: Message = CommandArg()):
         player_best_50_resp = await get_player_best_50({"qq":query})
         if player_best_50_resp.status == 200:
             player_best_50_result = await player_best_50_resp.json()
-            userdata.bindTencentUserId(user_id,query)
+            userdata.bindTencentUserId(user_id,query,player_best_50_result.get('username'))
             await bind_user.finish(f"绑定成功,查询到查分器用户名为:{player_best_50_result.get('nickname','')}")
     
     player_best_50_resp = await get_player_best_50({"username":query})
     if player_best_50_resp.status == 200:
         player_best_50_result = await player_best_50_resp.json()
-        userdata.bindDivingFishUserId(user_id,query)
+        userdata.bindDivingFishUserId(user_id,query,player_best_50_result.get('username'))
         await bind_user.finish(f"绑定成功,查询到查分器用户名为:{player_best_50_result.get('nickname','')}")
     elif player_best_50_resp.status == 400:
         await bind_user.finish(f"绑定失败,未查询到水鱼查分器用户名:{query}")
