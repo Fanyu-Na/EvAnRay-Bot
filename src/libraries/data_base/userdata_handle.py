@@ -24,8 +24,8 @@ class UserData(object):
             return {}
             # return self.userdata_collection.find_one({"_id":"maxscore"})
         
-    def bindTencentUserId(self,user_id:str,tencent_user_id:str):
-        data = {'tencent_user_id': tencent_user_id}
+    def bindTencentUserId(self,user_id:str,tencent_user_id:str,user_name:str):
+        data = {'tencent_user_id': tencent_user_id, "user_name":user_name}
         existing_data = self.userdata_collection.find_one({'_id': user_id})
         if existing_data:
             self.userdata_collection.update_one({'_id': user_id}, {'$set': data})
@@ -33,8 +33,8 @@ class UserData(object):
             data['_id'] = user_id
             self.userdata_collection.insert_one(data)
 
-    def bindDivingFishUserId(self,user_id:str,divingfish_user_id:str):
-        data = {'divingfish_user_id': divingfish_user_id}
+    def bindDivingFishUserId(self,user_id:str,divingfish_user_id:str,user_name:str):
+        data = {'divingfish_user_id': divingfish_user_id, "user_name":user_name}
         existing_data = self.userdata_collection.find_one({'_id': user_id})
         if existing_data:
             self.userdata_collection.update_one({'_id': user_id}, {'$set': data})
