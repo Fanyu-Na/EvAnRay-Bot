@@ -28,3 +28,5 @@ version_maps = {
     "舞": ["maimai PLUS", "maimai", "maimai GreeN", "maimai GreeN PLUS", "maimai ORANGE", "maimai ORANGE PLUS","maimai PiNK", "maimai PiNK PLUS", "maimai MURASAKi", "maimai MURASAKi PLUS", "maimai MiLK", "MiLK PLUS","maimai FiNALE"],
     "霸": ["maimai PLUS", "maimai", "maimai GreeN", "maimai GreeN PLUS", "maimai ORANGE", "maimai ORANGE PLUS","maimai PiNK", "maimai PiNK PLUS", "maimai MURASAKi", "maimai MURASAKi PLUS", "maimai MiLK", "MiLK PLUS","maimai FiNALE"]
 }
+
+ALL_VERSION_LIST = ["maimai PLUS","maimai","maimai GreeN","maimai GreeN PLUS","maimai ORANGE","maimai ORANGE PLUS","maimai PiNK","maimai PiNK PLUS","maimai MURASAKi","maimai MURASAKi PLUS","maimai MiLK","MiLK PLUS","maimai FiNALE","maimai でらっくす","maimai でらっくす FESTiVAL","maimai でらっくす UNiVERSE","maimai でらっくす Splash"]
