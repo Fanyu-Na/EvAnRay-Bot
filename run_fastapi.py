@@ -21,7 +21,6 @@ app.add_middleware(
 async def ping(request: Request):
     return JSONResponse({"message": "Hello World"})
 
-# 定义一个接口，接受相对路径并返回路径图片的响应体
 @app.get("/get_player_best_50/{file_name:path}")
 async def get_image(file_name: str):
     # 将相对路径转换为绝对路径
@@ -34,7 +33,6 @@ async def get_image(file_name: str):
     # 返回文件响应
     return FileResponse(str(absolute_path))
 
-# 定义一个接口，接受相对路径并返回路径图片的响应体
 @app.get("/get_music_info/{file_name:path}")
 async def get_image(file_name: str):
     # 将相对路径转换为绝对路径
@@ -48,7 +46,6 @@ async def get_image(file_name: str):
     return FileResponse(str(absolute_path))
 
 
-# 定义一个接口，接受相对路径并返回路径图片的响应体
 @app.get("/get_player_music_score/{file_name:path}")
 async def get_image(file_name: str):
     # 将相对路径转换为绝对路径
@@ -61,6 +58,29 @@ async def get_image(file_name: str):
     # 返回文件响应
     return FileResponse(str(absolute_path))
 
+@app.get("/get_player_version_plate_table/{file_name:path}")
+async def get_image(file_name: str):
+    # 将相对路径转换为绝对路径
+    absolute_path = Path(f"temp/img/player_version_plate_table/{file_name}.png").resolve()
+
+    # 检查文件是否存在
+    if not absolute_path.is_file():
+        return {"error": "文件不存在"}
+
+    # 返回文件响应
+    return FileResponse(str(absolute_path))
+
+@app.get("/get_player_level_table/{file_name:path}")
+async def get_image(file_name: str):
+    # 将相对路径转换为绝对路径
+    absolute_path = Path(f"temp/img/player_level_table/{file_name}.png").resolve()
+
+    # 检查文件是否存在
+    if not absolute_path.is_file():
+        return {"error": "文件不存在"}
+
+    # 返回文件响应
+    return FileResponse(str(absolute_path))
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=13812)
